@@ -22,9 +22,9 @@ jobs:
           set -e
           base64 -d source-1.2.b64 > source-1.2.zip
           unzip -o source-1.2.zip
-          curl -L -s https://services.gradle.org/distributions/gradle-8.11.2-bin.zip -o /tmp/gradle.zip
+          curl --fail --retry 2 -L -s https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-          /tmp/gradle-8.11.2/bin/gradle assembleRelease
+          /tmp/gradle-8.11.1/bin/gradle assembleRelease
           cp app/build/outputs/apk/phone/release/app-phone-release-unsigned.apk phone-unsigned.apk
           cp app/build/outputs/apk/watch/release/app-watch-release-unsigned.apk wear-unsigned.apk
           umask 077
