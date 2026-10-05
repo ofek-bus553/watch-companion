@@ -1,4 +1,4 @@
-name: Sign tested update
+name: Sign tested redesign
 on:
   workflow_dispatch:
   push:
@@ -20,11 +20,11 @@ jobs:
           SIGN_PASS: ${{ secrets.WATCH_SIGN_PASSWORD }}
         run: |
           set -e
-          base64 -d source-1.1.b64 > source-1.1.zip
-          unzip -o source-1.1.zip
-          curl -L -s https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip
+          base64 -d source-1.2.b64 > source-1.2.zip
+          unzip -o source-1.2.zip
+          curl -L -s https://services.gradle.org/distributions/gradle-8.11.2-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-          /tmp/gradle-8.11.1/bin/gradle assembleRelease
+          /tmp/gradle-8.11.2/bin/gradle assembleRelease
           cp app/build/outputs/apk/phone/release/app-phone-release-unsigned.apk phone-unsigned.apk
           cp app/build/outputs/apk/watch/release/app-watch-release-unsigned.apk wear-unsigned.apk
           umask 077
@@ -33,12 +33,12 @@ jobs:
           mkdir signed
           for d in phone wear; do
             "$BT/zipalign" -f 4 "$d-unsigned.apk" "$RUNNER_TEMP/$d.apk"
-            "$BT/apksigner" sign --ks "$RUNNER_TEMP/signing.jks" --ks-pass env:SIGN_PASS --out "signed/$d-1.1.apk" "$RUNNER_TEMP/$d.apk"
-            "$BT/apksigner" verify --print-certs "signed/$d-1.1.apk"
+            "$BT/apksigner" sign --ks "$RUNNER_TEMP/signing.jks" --ks-pass env:SIGN_PASS --out "signed/$d-1.2.apk" "$RUNNER_TEMP/$d.apk"
+            "$BT/apksigner" verify --print-certs "signed/$d-1.2.apk"
           done
           rm "$RUNNER_TEMP/signing.jks"
       - name: Publish first update beta
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.1-beta signed/*.apk source-1.1.zip --prerelease --title 'השעון שלי · 1.1 תובנות מקומיות' --notes 'תובנות מקומיות לפי כללים, לא מודל AI. בלי העלאת בריאות. לפחות 3 ימי נתונים; ימים חסרים לא נספרים כאפס. אותה חתימה וחבילה, מתקין כעדכון. לא נבדק על מכשיר פיזי.'
+          gh release create v1.2-beta signed/*.apk source-1.2.zip --prerelease --title 'השעון שלי · 1.2 עיצוב חדש ווידג׳טים' --notes 'ממשק מינימליסטי בהשראת זכוכית, ארבעה ווידג׳טים ויותר תובנות אישיות מקומיות. פרטי מקורות מאחורי לחיצה. ווידג׳טים מציגים את קריאת האפליקציה האחרונה, לא ניטור חי; הקש כדי לפתוח ולרענן. אין העלאת בריאות. ימים חסרים לא אפס. אותה חתימה וחבילה, מתקין כעדכון. לא נבדק על מכשיר פיזי.'
