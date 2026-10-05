@@ -20,8 +20,8 @@ jobs:
           SIGN_PASS: ${{ secrets.WATCH_SIGN_PASSWORD }}
         run: |
           set -e
-          base64 -d source-1.2.b64 > source-1.2.zip
-          unzip -o source-1.2.zip
+          base64 -d source-1.3.b64 > source-1.3.zip
+          unzip -o source-1.3.zip
           curl --fail --retry 2 -L -s https://services.gradle.org/distributions/gradle-8.11.1-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
           /tmp/gradle-8.11.1/bin/gradle assembleRelease
@@ -33,12 +33,12 @@ jobs:
           mkdir signed
           for d in phone wear; do
             "$BT/zipalign" -f 4 "$d-unsigned.apk" "$RUNNER_TEMP/$d.apk"
-            "$BT/apksigner" sign --ks "$RUNNER_TEMP/signing.jks" --ks-pass env:SIGN_PASS --out "signed/$d-1.2.apk" "$RUNNER_TEMP/$d.apk"
-            "$BT/apksigner" verify --print-certs "signed/$d-1.2.apk"
+            "$BT/apksigner" sign --ks "$RUNNER_TEMP/signing.jks" --ks-pass env:SIGN_PASS --out "signed/$d-1.3.apk" "$RUNNER_TEMP/$d.apk"
+            "$BT/apksigner" verify --print-certs "signed/$d-1.3.apk"
           done
           rm "$RUNNER_TEMP/signing.jks"
       - name: Publish first update beta
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create v1.2-beta signed/*.apk source-1.2.zip --prerelease --title 'השעון שלי · 1.2 עיצוב חדש ווידג׳טים' --notes 'ממשק מינימליסטי בהשראת זכוכית, ארבעה ווידג׳טים ויותר תובנות אישיות מקומיות. פרטי מקורות מאחורי לחיצה. ווידג׳טים מציגים את קריאת האפליקציה האחרונה, לא ניטור חי; הקש כדי לפתוח ולרענן. אין העלאת בריאות. ימים חסרים לא אפס. אותה חתימה וחבילה, מתקין כעדכון. לא נבדק על מכשיר פיזי.'
+          gh release create v1.3-beta signed/*.apk source-1.3.zip --prerelease --title 'השעון שלי · 1.3 צבעים ומידע בלי חלונות קופצים' --notes 'ממשק מינימליסטי בהשראת זכוכית, ארבעה ווידג׳טים ויותר תובנות אישיות מקומיות. פרטים נפתחים בתוך המסך, בלי חלונות קופצים. מדדים צבעוניים עם תקופה ויחידות, ווידג׳טים עם טבעת יעד אישי. ווידג׳טים מציגים את קריאת האפליקציה האחרונה, לא ניטור חי; הקש כדי לפתוח ולרענן. אין העלאת בריאות. ימים חסרים לא אפס. אותה חתימה וחבילה, מתקין כעדכון. לא נבדק על מכשיר פיזי.'
